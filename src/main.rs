@@ -152,22 +152,36 @@ fn resolve_path(context_path: &str, path_to_resolve: &Cursor) -> Result<String> 
         return Err(format!("Could not get parent of context_path: {context_path}"));
     };
 
-    let path = if let Ok(path) = context_path.join(path).canonicalize() {
-        path
-    } else {
-        return Err(format!("Could not canonicalize path: {path}"));
-    };
+    // HACK: The source file might be buried in some structure a/b/c/d/file.sol
+    // in order to resolve its imports we allow ourselves to walk up the hierarchy
+    // until we find the proper root of the import.
+    let mut file_path = None;
+    for i in 0..7 {
+        let mut context_path = context_path.to_path_buf();
+        for _ in 0..i {
+            context_path = context_path.join("..");
+        }
+        if let Ok(path) = context_path.join(path).canonicalize() {
+            file_path = Some(path);
+            break;
+        }
+    }
 
-    let path_str = if let Some(path_str) = path.as_os_str().to_str() {
-        path_str
-    } else {
-        return Err("Could not convert path to str".into());
-    };
+    match file_path {
+        Some(path) => {
+            let path_str = if let Some(path_str) = path.as_os_str().to_str() {
+                path_str
+            } else {
+                return Err("Could not convert path to str".into());
+            };
 
-    if path.exists() {
-        Ok(String::from(path_str))
-    } else {
-        Err(format!("Path does not exist: {path_str}"))
+            if path.exists() {
+                Ok(String::from(path_str))
+            } else {
+                Err(format!("Path does not exist: {path_str}"))
+            }
+        },
+        None => Err(format!("Could not canonicalize path: {path}")),
     }
 }
 
@@ -213,7 +227,7 @@ impl Display for TestResult {
 fn results_to_csv(results: Vec<TestResult>) -> String {
     let mut csv = String::new();
 
-    writeln!(&mut csv, "Name,Total Time,Build Time,Setup Time,Resolution Time,Go to Def/Ref (max),Go to Def/Ref (min),Go to Def/Ref (mean)").unwrap();
+    writeln!(&mut csv, "Name,Total Time (s),Build Time (s),Setup Time (s),Resolution Time (s),Go to Def/Ref (max) (ms),Go to Def/Ref (min) (ms),Go to Def/Ref (mean) (ms)").unwrap();
 
     for res in results {
         writeln!(&mut csv, "{}", res).unwrap();
