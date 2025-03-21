@@ -1,0 +1,6 @@
+Name,Total Time,Build Time,Setup Time,Resolution Time,Go to Def/Ref (max),Go to Def/Ref (min),Go to Def/Ref (mean)
+WeightedPool,49.422,2.375,0,47.047,358,0,73.52273
+UiPoolDataProviderV2V3,1.834,0.96,0,0.874,3,0,0.34273317
+Uniswap,3.699,1.641,0,2.058,13,0,9.705882
+AAVE,6.015,3.051,0,2.964,5,0,0.8767123
+DoodledBears,1.859,0.482,0,1.377,31,0,5.558511

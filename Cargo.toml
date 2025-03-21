@@ -1,0 +1,8 @@
+[package]
+name = "slang-timings"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+semver = "1.0.26"
+slang_solidity = { path = "../../slang/crates/solidity/outputs/cargo/crate", features = ["__private_compilation_api", "__experimental_bindings_api"] }
